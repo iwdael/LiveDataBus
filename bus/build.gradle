@@ -1,0 +1,28 @@
+apply from: './../config.gradle'
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+android {
+    compileSdk buidConfig.compileSdkVersion
+    defaultConfig {
+        minSdk buidConfig.minSdkVersion
+        targetSdk buidConfig.targetSdkVersion
+        versionCode buidConfig.versionCode
+        versionName buidConfig.versionName
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    api project(path: ':annotation')
+    implementation dep.kotlinStdlib
+    implementation dep.coreKtx
+    implementation dep.appcompat
+    implementation dep.constraintlayout
+}

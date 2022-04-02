@@ -1,0 +1,33 @@
+apply from: './../config.gradle'
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdk buidConfig.compileSdkVersion
+    defaultConfig {
+        applicationId "com.iwdael.livedatabus.example"
+        minSdk buidConfig.minSdkVersion
+        targetSdk buidConfig.targetSdkVersion
+        versionCode buidConfig.versionCode
+        versionName buidConfig.versionName
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation dep.kotlinStdlib
+    implementation dep.coreKtx
+    implementation dep.appcompat
+    implementation dep.constraintlayout
+    implementation project(path: ':bus')
+    kapt project(path: ':compiler')
+}

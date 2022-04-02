@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.iwdael.livedatabus">
+    <application>
+        <provider
+            android:authorities="com.iwdael.livedatabus.LiveDataBusContentProvider"
+            android:name="com.iwdael.livedatabus.LiveDataBusContentProvider"/>
+    </application>
+</manifest>
