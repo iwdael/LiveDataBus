@@ -28,6 +28,6 @@ dependencies {
     implementation dep.coreKtx
     implementation dep.appcompat
     implementation dep.constraintlayout
-    implementation project(path: ':bus')
+    implementation project(path: ':core')
     kapt project(path: ':compiler')
 }

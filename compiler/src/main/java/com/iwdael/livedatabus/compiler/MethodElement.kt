@@ -1,11 +1,8 @@
 package com.iwdael.livedatabus.compiler
 import javax.lang.model.element.*
 /**
- * author : 段泽全(iwdael)
+ * author : Iwdael
  * e-mail : iwdael@outlook.com
- * time   : 2019/8/5
- * desc   :
- * version: 1.0
  */
 class MethodElement(private val element: ExecutableElement) {
 

@@ -1,5 +1,6 @@
-package com.iwdael.livedatabus.annotation;
-
-public @interface ObserveSticky {
-    String value() default "";
-}
+package com.iwdael.livedatabus.annotation
+/**
+ * author : Iwdael
+ * e-mail : iwdael@outlook.com
+ */
+annotation class ObserveSticky(val value: String = "")

@@ -3,6 +3,11 @@ package com.iwdael.livedatabus.compiler
 
 import com.iwdael.livedatabus.annotation.Observe
 import com.iwdael.livedatabus.annotation.ObserveSticky
+
+/**
+ * author : Iwdael
+ * e-mail : iwdael@outlook.com
+ */
 class LiveDataBus(val  element: ClassElement) {
     val packageName = element.getPackage()
     val targetClassName = element.getClassName()

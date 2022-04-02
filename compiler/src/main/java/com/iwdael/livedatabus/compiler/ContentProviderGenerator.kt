@@ -3,11 +3,8 @@ package com.iwdael.livedatabus.compiler
 import java.lang.StringBuilder
 
 /**
- * author : 段泽全(hacknife)
- * e-mail : hacknife@outlook.com
- * time   : 2019/8/5
- * desc   : MVVM
- * version: 1.0
+ * author : Iwdael
+ * e-mail : iwdael@outlook.com
  */
 class ContentProviderGenerator(val buses: List<LiveDataBus>) {
     fun generate(): String = "package com.iwdael.livedatabus\n" +

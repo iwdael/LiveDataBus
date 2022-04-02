@@ -11,11 +11,8 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.TypeElement
 
 /**
- * author : 段泽全(iwdael)
+ * author : Iwdael
  * e-mail : iwdael@outlook.com
- * time   : 2022/3/29
- * desc   :
- * version: 1.0
  */
 @AutoService(Processor::class)
 class LiveDataBusProcessor : AbstractProcessor() {

@@ -3,7 +3,10 @@ package com.iwdael.livedatabus.compiler
 import com.iwdael.livedatabus.annotation.Observe
 import com.iwdael.livedatabus.annotation.ObserveSticky
 import java.lang.StringBuilder
-
+/**
+ * author : Iwdael
+ * e-mail : iwdael@outlook.com
+ */
 class JavaGenerator(val bus: LiveDataBus) {
 
     private val header = "package ${bus.packageName};\n"
