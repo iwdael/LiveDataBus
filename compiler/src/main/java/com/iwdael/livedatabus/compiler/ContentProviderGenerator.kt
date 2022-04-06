@@ -49,8 +49,9 @@ class ContentProviderGenerator(val buses: List<LiveDataBus>) {
             "        selectionArgs: Array<out String>?\n" +
             "    ) = -1\n" +
             "\n" +
+            "    private val liveDataBuses = mutableMapOf<Int, ObserveLiveDataBus<*>>()\n" +
             "    override fun onActivityCreated(p0: Activity, p1: Bundle?) {\n" +
-            "        observeLiveDataBus(p0)\n" +
+            "        observeLiveDataBus(p0)?.let { liveDataBuses[p0.hashCode()] = it }\n" +
             "    }\n" +
             "\n" +
             "    override fun onActivityStarted(p0: Activity) {\n" +
@@ -74,12 +75,13 @@ class ContentProviderGenerator(val buses: List<LiveDataBus>) {
             "    }\n" +
             "\n" +
             "    override fun onActivityDestroyed(p0: Activity) {\n" +
-            "\n" +
+            "        liveDataBuses[p0.hashCode()]?.removeAllObserver()\n" +
             "    }\n" +
             "\n" +
-            "    private fun observeLiveDataBus(activity: Activity) {\n" +
-            "        when (activity) {\n" +
+            "    private fun observeLiveDataBus(activity: Activity) :ObserveLiveDataBus<*>? {\n" +
+            "        return when (activity) {\n" +
             observeLiveDataBus() +
+            "            else -> null\n"+
             "        }\n" +
             "    }\n" +
             "\n" +

@@ -1,8 +1,11 @@
 package com.iwdael.livedatabus.compiler
 
 import com.iwdael.livedatabus.annotation.Observe
+import com.iwdael.livedatabus.annotation.ObserveForever
+import com.iwdael.livedatabus.annotation.ObserveForeverSticky
 import com.iwdael.livedatabus.annotation.ObserveSticky
 import java.lang.StringBuilder
+
 /**
  * author : Iwdael
  * e-mail : iwdael@outlook.com
@@ -13,7 +16,8 @@ class KotlinGenerator(val bus: LiveDataBus) {
     private val packages = arrayListOf<String>(
         "import ${bus.packageName}.${bus.targetClassName}\n",
         "import com.iwdael.livedatabus.LiveDataBus\n",
-        "import com.iwdael.livedatabus.ObserveLiveDataBus\n\n\n"
+        "import androidx.lifecycle.Observer\n",
+        "import com.iwdael.livedatabus.ObserveLiveDataBus\n\n\n\n\n\n"
     )
     private val class_header =
         "/**\n" +
@@ -28,86 +32,195 @@ class KotlinGenerator(val bus: LiveDataBus) {
         return header + packages.joinToString(separator = "") +
                 class_header +
                 subscribe() +
-                subscribeEvent() +
-                subscribeStickyEvent() +
+                observe() +
+                observeSticky() +
+                observeForever() +
+                observeForeverSticky() +
+                removeObserver() +
                 class_footer +
-                "\n\n\n\n"
+                "\n\n\n\n\n\n\n"
     }
 
-    private fun subscribeEvent(): String {
+    private fun removeObserver(): String {
         val builder = StringBuilder()
-        bus.eventMethods.forEach {
+        builder.append("    override fun removeAllObserver() {\n")
+        bus.observeForever.forEach {
+            val type = it.getAnnotation(ObserveForever::class.java)?.value
+            if (type?.isEmpty() == true) {
+                builder.append(
+                    "        ${it.makeVariableName()}?.let { LiveDataBus.with(${it.observeType(true)}::class.java).removeObserver(it) }\n"
+                )
+            } else {
+                builder.append(
+                    "        ${it.makeVariableName()}?.let { LiveDataBus.with(${it.observeType(true)}::class.java).removeObserver(it) }\n"
+                )
+            }
+        }
+        bus.observeForeverSticky.forEach {
+            val type = it.getAnnotation(ObserveForeverSticky::class.java)?.value
+            if (type?.isEmpty() == true) {
+                builder.append(
+                    "        ${it.makeVariableName()}?.let { LiveDataBus.with(${it.observeType(true)}::class.java).removeObserver(it) }\n"
+                )
+            } else {
+                builder.append(
+                    "        ${it.makeVariableName()}?.let { LiveDataBus.with(${it.observeType(true)}::class.java).removeObserver(it) }\n"
+                )
+            }
+        }
+        builder.append("    }\n\n\n\n\n")
+        return builder.toString()
+    }
+
+    private fun observeForever(): String {
+        val builder = StringBuilder()
+        bus.observeForever.forEach {
+            builder.append(
+                "    private class ${it.makeClassName()}" +
+                        "(private val owner: ${bus.targetClassName}) : " +
+                        "Observer<${it.observeType(true)}> {\n" +
+                        "        override fun onChanged(it: ${it.observeType(true)}) {\n" +
+                        "            owner.${it.getName()}(it)\n" +
+                        "        }\n" +
+                        "    }\n"
+            )
+            builder.append(
+                "    private var ${it.makeVariableName()}: Observer<${it.observeType(true)}>? = null\n"
+            )
+            val type = it.getAnnotation(ObserveForever::class.java)?.value
+            if (type?.isEmpty() == true)
+                builder.append(
+                    "    private fun ${it.makeVariableName()}(owner: ${bus.targetClassName}) {\n" +
+                            "        ${it.makeVariableName()} = ${it.makeClassName()}(owner)\n" +
+                            "        LiveDataBus.with(${it.observeType(true)}::class.java)\n" +
+                            "            .observeForever(${it.makeVariableName()}!!)\n" +
+                            "    }\n\n\n\n\n\n"
+                )
+            else
+                builder.append(
+                    "    private fun ${it.makeVariableName()}(owner: ${bus.targetClassName}) {\n" +
+                            "        ${it.makeVariableName()} = ${it.makeClassName()}(owner)\n" +
+                            "        LiveDataBus.with<${it.observeType(true)}>(\"${type}\")\n" +
+                            "            .observeForever(${it.makeVariableName()}!!)\n" +
+                            "    }\n\n\n\n\n\n"
+                )
+        }
+        return builder.toString()
+    }
+
+    private fun observeForeverSticky(): String {
+        val builder = StringBuilder()
+        bus.observeForeverSticky.forEach {
+
+            builder.append(
+                "    private class ${it.makeClassName()}" +
+                        "(private val owner: ${bus.targetClassName}) : Observer<${
+                            it.observeType(
+                                true
+                            )
+                        }> {\n" +
+                        "        override fun onChanged(it: ${it.observeType(true)}) {\n" +
+                        "            owner.${it.getName()}(it)\n" +
+                        "        }\n" +
+                        "    }\n"
+            )
+            builder.append(
+                "    private var ${it.makeVariableName()}: Observer<${
+                    it.getParameters()[0].asType().toString()
+                        .javaFullClass2KotlinShotClass()
+                }>? = null\n"
+            )
+            val type = it.getAnnotation(ObserveForeverSticky::class.java)?.value
+            if (type?.isEmpty() == true)
+                builder.append(
+                    "    private fun ${it.makeVariableName()}" +
+                            "(owner: ${bus.targetClassName}) {\n" +
+                            "        ${it.makeVariableName()} = ${it.makeClassName()}(owner)\n" +
+                            "        LiveDataBus.with(" +
+                            "${it.observeType(true)}::class.java)\n" +
+                            "            .observeForeverSticky(${it.makeVariableName()}!!)\n" +
+                            "    }\n\n\n\n\n\n"
+                )
+            else
+                builder.append(
+                    "    private fun ${it.makeVariableName()}" +
+                            "(owner: ${bus.targetClassName}) {\n" +
+                            "        ${it.makeVariableName()} = ${it.makeClassName()}(owner)\n" +
+                            "        LiveDataBus.with<${it.observeType(true)}>(\"${type}\")\n" +
+                            "            .observeForeverSticky(${it.makeVariableName()}!!)\n" +
+                            "    }\n\n\n\n\n\n"
+                )
+        }
+        return builder.toString()
+    }
+
+    private fun observe(): String {
+        val builder = StringBuilder()
+        bus.observe.forEach {
             val type = it.getAnnotation(Observe::class.java)?.value
             if (type?.isEmpty() == true)
                 builder.append(
-                    "    private fun observe${it.getName().firstUpper()}" +
+                    "    private fun ${it.makeVariableName()}" +
                             "(owner: ${bus.targetClassName}) {\n" +
-                            "        LiveDataBus.with(" +
-                            "${
-                                it.getParameters()[0].asType()
-                                    .toString().javaFullClass2KotlinShotClass()
-                            }::class.java)\n" +
+                            "        LiveDataBus.with(${it.observeType(true)}::class.java)\n" +
                             "            .observe(owner) { owner.${it.getName()}(it) }\n" +
-                            "    }\n\n\n"
+                            "    }\n\n\n\n\n\n"
                 )
             else
                 builder.append(
-                    "    private fun observe${it.getName().firstUpper()}" +
+                    "    private fun ${it.makeVariableName()}" +
                             "(owner: ${bus.targetClassName}) {\n" +
-                            "        LiveDataBus.with<${
-                                it.getParameters()[0].asType()
-                                    .toString().javaFullClass2KotlinShotClass()
-                            }>(\"${type}\")\n" +
+                            "        LiveDataBus.with<${it.observeType(true)}>(\"${type}\")\n" +
                             "            .observe(owner) { owner.${it.getName()}(it) }\n" +
-                            "    }\n\n\n"
+                            "    }\n\n\n\n\n\n"
                 )
         }
         return builder.toString()
     }
 
-    private fun subscribeStickyEvent(): String {
+    private fun observeSticky(): String {
         val builder = StringBuilder()
-        bus.stickyEventMethods.forEach {
+        bus.observeSticky.forEach {
             val type = it.getAnnotation(ObserveSticky::class.java)?.value
             if (type?.isEmpty() == true)
                 builder.append(
-                    "    private fun observe${it.getName().firstUpper()}" +
+                    "    private fun ${it.makeVariableName()}" +
                             "(owner: ${bus.targetClassName}) {\n" +
-                            "        LiveDataBus.with(${
-                                it.getParameters()[0].asType()
-                                    .toString().javaFullClass2KotlinShotClass()
-                            }::class.java)\n" +
+                            "        LiveDataBus.with(${it.observeType(true)}::class.java)\n" +
                             "            .observeSticky(owner) { owner.${it.getName()}(it) }\n" +
-                            "    }\n\n\n"
+                            "    }\n\n\n\n\n\n"
                 )
             else
                 builder.append(
-                    "    private fun observe${it.getName().firstUpper()}" +
+                    "    private fun ${it.makeVariableName()}" +
                             "(owner: ${bus.targetClassName}) {\n" +
-                            "        LiveDataBus.with<${
-                                it.getParameters()[0].asType()
-                                    .toString().javaFullClass2KotlinShotClass()
-                            }>(\"${type}\")\n" +
+                            "        LiveDataBus.with<${it.observeType(true)}>(\"${type}\")\n" +
                             "            .observeSticky(owner) { owner.${it.getName()}(it) }\n" +
-                            "    }\n\n\n"
+                            "    }\n\n\n\n\n\n"
                 )
         }
         return builder.toString()
     }
 
-    fun subscribe(): String {
+    private fun subscribe(): String {
         val builder = StringBuilder()
         builder.append(
             "    override fun observe(owner: ${bus.targetClassName}): ${bus.generatedClassName} {\n"
         )
-        bus.stickyEventMethods.forEach {
-            builder.append("        observe${it.getName().firstUpper()}(owner)\n")
+        bus.observeSticky.forEach {
+            builder.append("        ${it.makeVariableName()}(owner)\n")
         }
-        bus.eventMethods.forEach {
-            builder.append("        observe${it.getName().firstUpper()}(owner)\n")
+        bus.observe.forEach {
+            builder.append("        ${it.makeVariableName()}(owner)\n")
+        }
+        bus.observeForever.forEach {
+            builder.append("        ${it.makeVariableName()}(owner)\n")
+        }
+        bus.observeForeverSticky.forEach {
+            builder.append("        ${it.makeVariableName()}(owner)\n")
         }
         builder.append("        return this\n")
-        builder.append("    }\n\n\n")
+        builder.append("    }\n\n\n\n\n\n")
         return builder.toString()
     }
 

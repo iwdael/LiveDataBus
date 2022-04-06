@@ -116,3 +116,29 @@ fun String.javaFullClass2KotlinShotClass(): String {
         else -> this
     }
 }
+
+
+fun MethodElement.makeVariableName(): String {
+    return "observe${getName().firstUpper()}_${
+        this.getParameters().joinToString(
+            separator = "_",
+            transform = {
+                it.asType().toString().javaFullClass2KotlinShotClass().replace("<", "_")
+                    .replace(">", "")
+            })
+    }"
+}
+
+
+fun MethodElement.makeClassName(): String {
+    return makeVariableName().firstUpper()
+}
+
+fun MethodElement.observeType(isKot: Boolean): String {
+    return if (isKot) {
+        getParameters().getOrNull(0)?.asType()?.toString()
+            ?.javaFullClass2KotlinShotClass() ?: ""
+    } else {
+        getParameters().getOrNull(0)?.asType()?.toString() ?: ""
+    }
+}
