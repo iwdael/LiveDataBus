@@ -1,9 +1,6 @@
 package com.iwdael.livedatabus.compiler
 
-import com.iwdael.livedatabus.annotation.Observe
-import com.iwdael.livedatabus.annotation.ObserveForever
-import com.iwdael.livedatabus.annotation.ObserveForeverSticky
-import com.iwdael.livedatabus.annotation.ObserveSticky
+import com.iwdael.livedatabus.annotation.*
 import java.lang.StringBuilder
 
 /**
@@ -17,6 +14,9 @@ class JavaGenerator(val bus: LiveDataBus) {
         "import ${bus.packageName}.${bus.targetClassName};\n",
         "import com.iwdael.livedatabus.LiveDataBus;\n",
         "import androidx.lifecycle.Observer;\n",
+        "import kotlin.Unit;\n",
+        "import kotlin.jvm.functions.Function0;\n",
+        "import static com.iwdael.livedatabus.LiveDataBusCompatKt.runOnBackgroundThread;\n",
         "import com.iwdael.livedatabus.ObserveLiveDataBus;\n\n\n\n\n"
     )
     private val class_header =
@@ -84,6 +84,8 @@ class JavaGenerator(val bus: LiveDataBus) {
     private fun observeForever(): String {
         val builder = StringBuilder()
         bus.observeForever.forEach {
+            val dispatcher = it.getAnnotation(ObserveForever::class.java)?.dispatcher
+            val type = it.getAnnotation(ObserveForever::class.java)?.value
             builder.append(
                 "    private class ${it.makeClassName()} implements Observer<${it.observeType(false)}> { \n" +
                         "        private final ${bus.targetClassName} owner;\n" +
@@ -94,14 +96,13 @@ class JavaGenerator(val bus: LiveDataBus) {
                         "\n" +
                         "        @Override\n" +
                         "        public void onChanged(${it.observeType(false)} it) {\n" +
-                        "            owner.${it.getName()}(it);\n" +
+                        "            ${it.makeCallBack(false,dispatcher != Dispatcher.Main)};\n" +
                         "        }\n" +
                         "    }\n"
             )
             builder.append(
                 "    private Observer<String> ${it.makeVariableName()} = null;\n"
             )
-            val type = it.getAnnotation(ObserveForever::class.java)?.value
             if (type?.isEmpty() == true)
                 builder.append(
                     "    private void ${it.makeVariableName()}(${bus.targetClassName} owner) {\n" +
@@ -125,6 +126,8 @@ class JavaGenerator(val bus: LiveDataBus) {
     private fun observeForeverSticky(): String {
         val builder = StringBuilder()
         bus.observeForeverSticky.forEach {
+            val type = it.getAnnotation(ObserveForeverSticky::class.java)?.value
+            val dispatcher = it.getAnnotation(ObserveForeverSticky::class.java)?.dispatcher
             builder.append(
                 "    private class ${it.makeClassName()} implements Observer<${it.observeType(false)}> { \n" +
                         "        private final ${bus.targetClassName} owner;\n" +
@@ -135,14 +138,13 @@ class JavaGenerator(val bus: LiveDataBus) {
                         "\n" +
                         "        @Override\n" +
                         "        public void onChanged(${it.observeType(false)} it) {\n" +
-                        "            owner.${it.getName()}(it);\n" +
+                        "            ${it.makeCallBack(false,dispatcher != Dispatcher.Main)};\n" +
                         "        }\n" +
                         "    }\n"
             )
             builder.append(
                 "    private Observer<String> ${it.makeVariableName()} = null;\n"
             )
-            val type = it.getAnnotation(ObserveForeverSticky::class.java)?.value
             if (type?.isEmpty() == true)
                 builder.append(
                     "    private void ${it.makeVariableName()}(${bus.targetClassName} owner) {\n" +
@@ -167,6 +169,7 @@ class JavaGenerator(val bus: LiveDataBus) {
         val builder = StringBuilder()
         bus.observe.forEach {
             val type = it.getAnnotation(Observe::class.java)?.value
+            val dispatcher = it.getAnnotation(Observe::class.java)?.dispatcher
             if (type?.isEmpty() == true)
                 builder.append(
                     "    private void ${it.makeVariableName()}(${bus.targetClassName} owner) {\n" +
@@ -174,7 +177,7 @@ class JavaGenerator(val bus: LiveDataBus) {
                             "                .observe(owner, new Observer<${it.observeType(false)}>() {\n" +
                             "                    @Override\n" +
                             "                    public void onChanged(${it.observeType(false)} it) {\n" +
-                            "                        owner.${it.getName()}(it);\n" +
+                            "                        ${it.makeCallBack(false,dispatcher != Dispatcher.Main)};\n" +
                             "                    }\n" +
                             "                });\n" +
                             "    }\n\n\n\n\n"
@@ -186,7 +189,7 @@ class JavaGenerator(val bus: LiveDataBus) {
                             "                .observe(owner, new Observer<${it.observeType(false)}>() {\n" +
                             "                    @Override\n" +
                             "                    public void onChanged(${it.observeType(false)} it) {\n" +
-                            "                        owner.${it.getName()}(it);\n" +
+                            "                        ${it.makeCallBack(false,dispatcher != Dispatcher.Main)};\n" +
                             "                    }\n" +
                             "                });\n" +
                             "    }\n\n\n\n\n"
@@ -199,6 +202,7 @@ class JavaGenerator(val bus: LiveDataBus) {
         val builder = StringBuilder()
         bus.observeSticky.forEach {
             val type = it.getAnnotation(ObserveSticky::class.java)?.value
+            val dispatcher = it.getAnnotation(ObserveSticky::class.java)?.dispatcher
             if (type?.isEmpty() == true)
                 builder.append(
                     "    private void ${it.makeVariableName()}(${bus.targetClassName} owner) {\n" +
@@ -210,7 +214,7 @@ class JavaGenerator(val bus: LiveDataBus) {
                             }>() {\n" +
                             "                    @Override\n" +
                             "                    public void onChanged(${it.observeType(false)} it) {\n" +
-                            "                        owner.${it.getName()}(it);\n" +
+                            "                        ${it.makeCallBack(false,dispatcher != Dispatcher.Main)};\n" +
                             "                    }\n" +
                             "                });\n" +
                             "    }\n\n\n\n\n"
@@ -226,7 +230,7 @@ class JavaGenerator(val bus: LiveDataBus) {
                             }>() {\n" +
                             "                    @Override\n" +
                             "                    public void onChanged(${it.observeType(false)} it) {\n" +
-                            "                        owner.${it.getName()}(it);\n" +
+                            "                        ${it.makeCallBack(false,dispatcher != Dispatcher.Main)};\n" +
                             "                    }\n" +
                             "                });\n" +
                             "    }\n\n\n\n\n"

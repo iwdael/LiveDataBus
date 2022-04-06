@@ -1,9 +1,6 @@
 package com.iwdael.livedatabus.compiler
 
-import com.iwdael.livedatabus.annotation.Observe
-import com.iwdael.livedatabus.annotation.ObserveForever
-import com.iwdael.livedatabus.annotation.ObserveForeverSticky
-import com.iwdael.livedatabus.annotation.ObserveSticky
+import com.iwdael.livedatabus.annotation.*
 import java.lang.StringBuilder
 
 /**
@@ -17,6 +14,7 @@ class KotlinGenerator(val bus: LiveDataBus) {
         "import ${bus.packageName}.${bus.targetClassName}\n",
         "import com.iwdael.livedatabus.LiveDataBus\n",
         "import androidx.lifecycle.Observer\n",
+        "import com.iwdael.livedatabus.runOnBackgroundThread\n",
         "import com.iwdael.livedatabus.ObserveLiveDataBus\n\n\n\n\n\n"
     )
     private val class_header =
@@ -75,19 +73,20 @@ class KotlinGenerator(val bus: LiveDataBus) {
     private fun observeForever(): String {
         val builder = StringBuilder()
         bus.observeForever.forEach {
+            val dispatcher = it.getAnnotation(ObserveForever::class.java)?.dispatcher
+            val type = it.getAnnotation(ObserveForever::class.java)?.value
             builder.append(
                 "    private class ${it.makeClassName()}" +
                         "(private val owner: ${bus.targetClassName}) : " +
                         "Observer<${it.observeType(true)}> {\n" +
                         "        override fun onChanged(it: ${it.observeType(true)}) {\n" +
-                        "            owner.${it.getName()}(it)\n" +
+                        "            ${it.makeCallBack(true,dispatcher != Dispatcher.Main)}\n" +
                         "        }\n" +
                         "    }\n"
             )
             builder.append(
                 "    private var ${it.makeVariableName()}: Observer<${it.observeType(true)}>? = null\n"
             )
-            val type = it.getAnnotation(ObserveForever::class.java)?.value
             if (type?.isEmpty() == true)
                 builder.append(
                     "    private fun ${it.makeVariableName()}(owner: ${bus.targetClassName}) {\n" +
@@ -111,7 +110,8 @@ class KotlinGenerator(val bus: LiveDataBus) {
     private fun observeForeverSticky(): String {
         val builder = StringBuilder()
         bus.observeForeverSticky.forEach {
-
+            val dispatcher = it.getAnnotation(ObserveForeverSticky::class.java)?.dispatcher
+            val type = it.getAnnotation(ObserveForeverSticky::class.java)?.value
             builder.append(
                 "    private class ${it.makeClassName()}" +
                         "(private val owner: ${bus.targetClassName}) : Observer<${
@@ -120,7 +120,7 @@ class KotlinGenerator(val bus: LiveDataBus) {
                             )
                         }> {\n" +
                         "        override fun onChanged(it: ${it.observeType(true)}) {\n" +
-                        "            owner.${it.getName()}(it)\n" +
+                        "            ${it.makeCallBack(true,dispatcher != Dispatcher.Main)}\n" +
                         "        }\n" +
                         "    }\n"
             )
@@ -130,7 +130,6 @@ class KotlinGenerator(val bus: LiveDataBus) {
                         .javaFullClass2KotlinShotClass()
                 }>? = null\n"
             )
-            val type = it.getAnnotation(ObserveForeverSticky::class.java)?.value
             if (type?.isEmpty() == true)
                 builder.append(
                     "    private fun ${it.makeVariableName()}" +
@@ -158,12 +157,13 @@ class KotlinGenerator(val bus: LiveDataBus) {
         val builder = StringBuilder()
         bus.observe.forEach {
             val type = it.getAnnotation(Observe::class.java)?.value
+            val dispatcher = it.getAnnotation(Observe::class.java)?.dispatcher
             if (type?.isEmpty() == true)
                 builder.append(
                     "    private fun ${it.makeVariableName()}" +
                             "(owner: ${bus.targetClassName}) {\n" +
                             "        LiveDataBus.with(${it.observeType(true)}::class.java)\n" +
-                            "            .observe(owner) { owner.${it.getName()}(it) }\n" +
+                            "            .observe(owner) { ${it.makeCallBack(true,dispatcher != Dispatcher.Main)} }\n" +
                             "    }\n\n\n\n\n\n"
                 )
             else
@@ -171,7 +171,7 @@ class KotlinGenerator(val bus: LiveDataBus) {
                     "    private fun ${it.makeVariableName()}" +
                             "(owner: ${bus.targetClassName}) {\n" +
                             "        LiveDataBus.with<${it.observeType(true)}>(\"${type}\")\n" +
-                            "            .observe(owner) { owner.${it.getName()}(it) }\n" +
+                            "            .observe(owner) { ${it.makeCallBack(true,dispatcher != Dispatcher.Main)} }\n" +
                             "    }\n\n\n\n\n\n"
                 )
         }
@@ -181,13 +181,14 @@ class KotlinGenerator(val bus: LiveDataBus) {
     private fun observeSticky(): String {
         val builder = StringBuilder()
         bus.observeSticky.forEach {
+            val dispatcher = it.getAnnotation(ObserveSticky::class.java)?.dispatcher
             val type = it.getAnnotation(ObserveSticky::class.java)?.value
             if (type?.isEmpty() == true)
                 builder.append(
                     "    private fun ${it.makeVariableName()}" +
                             "(owner: ${bus.targetClassName}) {\n" +
                             "        LiveDataBus.with(${it.observeType(true)}::class.java)\n" +
-                            "            .observeSticky(owner) { owner.${it.getName()}(it) }\n" +
+                            "            .observeSticky(owner) { ${it.makeCallBack(true,dispatcher != Dispatcher.Main)} }\n" +
                             "    }\n\n\n\n\n\n"
                 )
             else
@@ -195,7 +196,7 @@ class KotlinGenerator(val bus: LiveDataBus) {
                     "    private fun ${it.makeVariableName()}" +
                             "(owner: ${bus.targetClassName}) {\n" +
                             "        LiveDataBus.with<${it.observeType(true)}>(\"${type}\")\n" +
-                            "            .observeSticky(owner) { owner.${it.getName()}(it) }\n" +
+                            "            .observeSticky(owner) { ${it.makeCallBack(true,dispatcher != Dispatcher.Main)} }\n" +
                             "    }\n\n\n\n\n\n"
                 )
         }

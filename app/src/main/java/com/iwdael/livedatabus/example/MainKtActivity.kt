@@ -17,10 +17,10 @@ class MainKtActivity : AppCompatActivity() {
         LiveDataBus.post("dzq", "IMG form -------------")
         tvCenter.postDelayed({
             LiveDataBus.post("dzq", "IMG form ============")
-        },2000)
+        }, 2000)
     }
 
-    @Observe
+    @Observe(dispatcher = Dispatcher.Background)
     fun live(name: String) {
         Log.v("dzq", "live:${name}")
     }
@@ -50,7 +50,7 @@ class MainKtActivity : AppCompatActivity() {
         Log.v("dzq", "liveStrSticky:${name}")
     }
 
-    @ObserveForever("dzq")
+    @ObserveForever("dzq", dispatcher = Dispatcher.Background)
     fun liveStrForever(name: String) {
         Log.v("dzq", "liveStrForever:${name}")
     }

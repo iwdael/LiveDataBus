@@ -3,4 +3,4 @@ package com.iwdael.livedatabus.annotation
  * author : Iwdael
  * e-mail : iwdael@outlook.com
  */
-annotation class Observe(val value: String = "")
+annotation class Observe(val value: String = "", val dispatcher: Dispatcher = Dispatcher.Main)

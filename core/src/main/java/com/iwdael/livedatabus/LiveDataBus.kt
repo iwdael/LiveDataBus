@@ -1,6 +1,7 @@
 package com.iwdael.livedatabus
 
-import com.iwdael.livedatabus.ObservableWrapper
+import android.os.Handler
+import android.os.HandlerThread
 import androidx.lifecycle.MutableBusLiveData
 import java.util.HashMap
 
@@ -10,39 +11,48 @@ import java.util.HashMap
  */
 class LiveDataBus {
     private val busMap: MutableMap<Any, Observable<*>> = HashMap()
+    private val handleThread = HandlerThread("live_data_bus")
+    internal val handler: Handler
 
-    private object Holder {
+    private constructor() {
+        handleThread.start()
+        handler = Handler(handleThread.looper)
+    }
+
+    internal object Holder {
         val BUS = LiveDataBus()
     }
 
     companion object {
         @JvmStatic
-        fun <T> with(type: Class<T>): Observable<T> {
+        fun <V> with(type: Class<V>): Observable<V> {
             if (!Holder.BUS.busMap.containsKey(type)) {
                 Holder.BUS.busMap[type] =
-                    ObservableWrapper(MutableBusLiveData<T>())
+                    ObservableWrapper(MutableBusLiveData<V>())
             }
-            return Holder.BUS.busMap[type] as Observable<T>
+            return Holder.BUS.busMap[type] as Observable<V>
         }
 
         @JvmStatic
-        fun <T> with(type: String): Observable<T> {
+        fun <V> with(type: String): Observable<V> {
             if (!Holder.BUS.busMap.containsKey(type)) {
-                Holder.BUS.busMap[type] = ObservableWrapper(MutableBusLiveData<T>())
+                Holder.BUS.busMap[type] = ObservableWrapper(MutableBusLiveData<V>())
             }
-            return Holder.BUS.busMap[type] as Observable<T>
+            return Holder.BUS.busMap[type] as Observable<V>
         }
 
         @JvmStatic
-        fun <T : Any> post(e: T) {
-            val observable = with(e.javaClass) as ObservableWrapper<T>
-            observable.liveData.postValue(e)
+        fun <V : Any> post(value: V) {
+            val observable = with(value.javaClass) as ObservableWrapper<V>
+            observable.liveData.postValue(value)
         }
 
         @JvmStatic
-        fun <T : Any> post(key: String, e: T) {
-            val observable = with<T>(key) as ObservableWrapper<T>
-            observable.liveData.postValue(e)
+        fun <V : Any> post(key: String, value: V) {
+            val observable = with<V>(key) as ObservableWrapper<V>
+            observable.liveData.postValue(value)
         }
+
+
     }
 }

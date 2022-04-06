@@ -142,3 +142,25 @@ fun MethodElement.observeType(isKot: Boolean): String {
         getParameters().getOrNull(0)?.asType()?.toString() ?: ""
     }
 }
+
+fun MethodElement.makeCallBack(isKot: Boolean, isBackground: Boolean): String {
+    return if (isKot) {
+        if (isBackground) {
+            "runOnBackgroundThread{ owner.${getName()}(it) }"
+        } else {
+            "owner.${getName()}(it)"
+        }
+    } else {
+        if (isBackground) {
+            "runOnBackgroundThread(new Function0<Unit>() {\n" +
+                    "                            @Override\n" +
+                    "                            public Unit invoke() {\n" +
+                    "                                owner.${getName()}(it);\n" +
+                    "                                return null;\n" +
+                    "                            }\n" +
+                    "                        })"
+        } else {
+            "owner.${getName()}(it)"
+        }
+    }
+}

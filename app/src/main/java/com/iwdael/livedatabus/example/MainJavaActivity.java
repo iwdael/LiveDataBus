@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.iwdael.livedatabus.LiveDataBus;
+import com.iwdael.livedatabus.annotation.Dispatcher;
 import com.iwdael.livedatabus.annotation.Observe;
 import com.iwdael.livedatabus.annotation.ObserveForever;
 import com.iwdael.livedatabus.annotation.ObserveForeverSticky;
@@ -23,7 +24,7 @@ public class MainJavaActivity extends AppCompatActivity {
         LiveDataBus.post("dzq", "IMG form STR");
     }
 
-    @Observe
+    @Observe(dispatcher = Dispatcher.Background)
     public void live(String name) {
         Log.v("dzq", "live:" + name);
     }
@@ -38,7 +39,7 @@ public class MainJavaActivity extends AppCompatActivity {
         Log.v("dzq", "liveForever:" + name);
     }
 
-    @ObserveForeverSticky
+    @ObserveForeverSticky(dispatcher = Dispatcher.Background)
     public void liveForeverSticky(String name) {
         Log.v("dzq", "liveForeverSticky:" + name);
     }
