@@ -76,6 +76,7 @@ class ContentProviderGenerator(val buses: List<LiveDataBus>) {
             "\n" +
             "    override fun onActivityDestroyed(p0: Activity) {\n" +
             "        liveDataBuses[p0.hashCode()]?.removeAllObserver()\n" +
+            "        liveDataBuses.remove(p0.hashCode())\n" +
             "    }\n" +
             "\n" +
             "    private fun observeLiveDataBus(activity: Activity) :ObserveLiveDataBus<*>? {\n" +

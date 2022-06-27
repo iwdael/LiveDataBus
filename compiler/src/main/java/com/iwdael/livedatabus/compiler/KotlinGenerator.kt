@@ -50,7 +50,7 @@ class KotlinGenerator(val bus: LiveDataBus) {
                 )
             } else {
                 builder.append(
-                    "        ${it.makeVariableName()}?.let { LiveDataBus.with(${it.observeType(true)}::class.java).removeObserver(it) }\n"
+                    "        ${it.makeVariableName()}?.let { LiveDataBus.with<${it.observeType(true)}>(\"${type}\").removeObserver(it) }\n"
                 )
             }
         }
@@ -62,7 +62,7 @@ class KotlinGenerator(val bus: LiveDataBus) {
                 )
             } else {
                 builder.append(
-                    "        ${it.makeVariableName()}?.let { LiveDataBus.with(${it.observeType(true)}::class.java).removeObserver(it) }\n"
+                    "        ${it.makeVariableName()}?.let { LiveDataBus.with<${it.observeType(true)}>(\"${type}\").removeObserver(it) }\n"
                 )
             }
         }

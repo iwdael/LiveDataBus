@@ -58,12 +58,12 @@ class JavaGenerator(val bus: LiveDataBus) {
             } else {
                 builder.append(
                     "        if(${it.makeVariableName()} != null)  \n" +
-                            "            LiveDataBus.with(${it.observeType(false)}.class).removeObserver(${it.makeVariableName()}); \n"
+                            "            LiveDataBus.<${it.observeType(false)}>with(\"${type}\").removeObserver(${it.makeVariableName()}); \n"
                 )
             }
         }
         bus.observeForeverSticky.forEach {
-            val type = it.getAnnotation(ObserveForever::class.java)?.value
+            val type = it.getAnnotation(ObserveForeverSticky::class.java)?.value
             if (type?.isEmpty() == true) {
                 builder.append(
                     "        if(${it.makeVariableName()} != null) \n" +
@@ -72,7 +72,7 @@ class JavaGenerator(val bus: LiveDataBus) {
             } else {
                 builder.append(
                     "        if(${it.makeVariableName()} != null)  \n" +
-                            "            LiveDataBus.with(${it.observeType(false)}.class).removeObserver(${it.makeVariableName()}); \n"
+                            "            LiveDataBus.<${it.observeType(false)}>with(\"${type}\").removeObserver(${it.makeVariableName()}); \n"
                 )
             }
         }
