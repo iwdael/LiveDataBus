@@ -3,7 +3,7 @@
     package="com.iwdael.livedatabus">
     <application>
         <provider
-            android:authorities="com.iwdael.livedatabus.LiveDataBusContentProvider"
+            android:authorities="${applicationId}.LiveDataBusContentProvider"
             android:name="com.iwdael.livedatabus.LiveDataBusContentProvider"/>
     </application>
 </manifest>
