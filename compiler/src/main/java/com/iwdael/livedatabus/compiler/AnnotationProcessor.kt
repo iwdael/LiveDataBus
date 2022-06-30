@@ -1,4 +1,4 @@
-package com.iwdael.livedatabus.compiler2
+package com.iwdael.livedatabus.compiler
 
 import com.google.auto.service.AutoService
 import com.iwdael.annotationprocessorparser.Class
@@ -23,9 +23,10 @@ class AnnotationProcessor : AbstractProcessor() {
         roundEnv: RoundEnvironment?
     ): Boolean {
         if (initialized) return false
-        ContentProviderMaker().make(processingEnv.filer)
         roundEnv?.getElementsAnnotatedWith(UseLiveDataBus::class.java)
-            ?.map { LiveDataBusMaker(Class(it)) }
+            ?.map { Class(it) }
+            ?.apply { ContentProviderMaker(this).make(processingEnv.filer) }
+            ?.map { LiveDataBusMaker(it) }
             ?.forEach { it.make(processingEnv.filer) }
         initialized = true
         return false

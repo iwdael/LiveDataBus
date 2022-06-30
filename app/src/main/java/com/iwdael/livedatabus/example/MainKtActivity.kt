@@ -13,8 +13,8 @@ class MainKtActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         LiveDataBus.post("IMG form LiveDataBus")
-        LiveDataBus.post("dzq", "IMG form STR")
-        LiveDataBus.post("dzq", "IMG form -------------")
+//        LiveDataBus.post("dzq", "IMG form STR")
+//        LiveDataBus.post("dzq", "IMG form -------------")
         tvCenter.postDelayed({
             LiveDataBus.post("dzq", "IMG form ============")
         }, 2000)

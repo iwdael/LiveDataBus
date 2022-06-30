@@ -1,4 +1,4 @@
-package com.iwdael.livedatabus.compiler2
+package com.iwdael.livedatabus.compiler
 
 import javax.annotation.processing.Filer
 
